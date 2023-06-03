@@ -2,6 +2,7 @@ package jp.xhw.howalib.phase;
 
 import jp.xhw.howalib.HowaLib;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.jetbrains.annotations.Nullable;
@@ -17,18 +18,26 @@ public class PhaseManager<T> {
     @Getter
     @Nullable
     private PhaseBase<T> currentPhase;
+    private boolean started = false;
 
     public PhaseManager() {
         phaseMap = new HashMap<>();
     }
 
     public void update() {
-        if (currentPhase != null) currentPhase.update();
+        if (currentPhase != null) {
+            if (!started) {
+                currentPhase.onStart();
+                started = true;
+            }
+            currentPhase.update();
+        }
     }
 
     public void addPhase(T key, PhaseBase<T> phase) {
         phase.setManager(this);
         phaseMap.put(key, phase);
+        if (currentPhase == null) currentPhase = phase;
         Method[] methods = phase.getClass().getMethods();
         for (Method method : methods) {
             PhaseEventHandler phaseEventHandler = method.getAnnotation(PhaseEventHandler.class);
@@ -69,9 +78,11 @@ public class PhaseManager<T> {
     }
 
     public void changePhase(T key) {
-        if (currentPhase != null) currentPhase.end();
-        currentPhase = phaseMap.get(key);
-        currentPhase.start();
+        Bukkit.getScheduler().runTask(HowaLib.getInstance().getPlugin(), () -> {
+            if (currentPhase != null) currentPhase.end();
+            currentPhase = phaseMap.get(key);
+            currentPhase.start();
+        });
     }
 
 }
