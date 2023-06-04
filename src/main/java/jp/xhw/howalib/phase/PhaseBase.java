@@ -1,15 +1,14 @@
 package jp.xhw.howalib.phase;
 
 import jp.xhw.howalib.HowaLib;
-import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Listener;
 
 import java.util.logging.Level;
 
+@SuppressWarnings("unused")
 public abstract class PhaseBase<T> implements Listener {
 
-    @Getter
     @Setter
     private PhaseManager<T> manager;
 

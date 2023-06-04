@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class PhaseManager<T> {
 
     private final Map<T, PhaseBase<T>> phaseMap;
@@ -35,23 +37,27 @@ public class PhaseManager<T> {
     }
 
     public void addPhase(T key, PhaseBase<T> phase) {
+        final Plugin plugin = HowaLib.getInstance().getPlugin();
+
         phase.setManager(this);
         phaseMap.put(key, phase);
         if (currentPhase == null) currentPhase = phase;
-        Method[] methods = phase.getClass().getMethods();
+
+        plugin.getServer().getPluginManager().registerEvents(phase, plugin);
+        final Method[] methods = phase.getClass().getMethods();
         for (Method method : methods) {
-            PhaseEventHandler phaseEventHandler = method.getAnnotation(PhaseEventHandler.class);
+            final PhaseEventHandler phaseEventHandler = method.getAnnotation(PhaseEventHandler.class);
             if (phaseEventHandler == null) continue;
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-            Class<?> paramClass = method.getParameterTypes()[0];
+            final Class<?> paramClass = method.getParameterTypes()[0];
             if (method.getParameterTypes().length != 1 || !Event.class.isAssignableFrom(paramClass)) {
                 continue;
             }
-            Class<? extends Event> eventClass = paramClass.asSubclass(Event.class);
+            final Class<? extends Event> eventClass = paramClass.asSubclass(Event.class);
             method.setAccessible(true);
-            HowaLib.getInstance().getPlugin().getServer().getPluginManager()
+            plugin.getServer().getPluginManager()
                     .registerEvent(
                             eventClass,
                             phase,
@@ -71,7 +77,7 @@ public class PhaseManager<T> {
                                     throw new EventException(t);
                                 }
                             },
-                            HowaLib.getInstance().getPlugin(),
+                            plugin,
                             phaseEventHandler.ignoreCancelled()
                     );
         }
