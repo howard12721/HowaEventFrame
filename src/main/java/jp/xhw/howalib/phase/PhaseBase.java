@@ -7,10 +7,10 @@ import org.bukkit.event.Listener;
 import java.util.logging.Level;
 
 @SuppressWarnings("unused")
-public abstract class PhaseBase<T> implements Listener {
+public abstract class PhaseBase<T, Z> implements Listener {
 
     @Setter
-    private PhaseManager<T> manager;
+    private PhaseManager<T, Z> manager;
 
     protected PhaseBase() {
     }
@@ -37,6 +37,10 @@ public abstract class PhaseBase<T> implements Listener {
         } catch (Exception e) {
             HowaLib.getInstance().getLogger().log(Level.SEVERE, "フェーズの終了中に例外が発生しました", e);
         }
+    }
+
+    private Z getData() {
+        return manager.getData();
     }
 
     abstract protected void onStart();

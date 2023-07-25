@@ -14,16 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class PhaseManager<T> {
+public class PhaseManager<T, Z> {
 
-    private final Map<T, PhaseBase<T>> phaseMap;
+    private final Map<T, PhaseBase<T, Z>> phaseMap;
     @Getter
     @Nullable
-    private PhaseBase<T> currentPhase;
+    private PhaseBase<T, Z> currentPhase;
     private boolean started = false;
+    @Getter
+    private Z data;
 
-    public PhaseManager() {
-        phaseMap = new HashMap<>();
+    public PhaseManager(Z data) {
+        this.phaseMap = new HashMap<>();
+        this.data = data;
     }
 
     public void update() {
@@ -36,7 +39,7 @@ public class PhaseManager<T> {
         }
     }
 
-    public void addPhase(T key, PhaseBase<T> phase) {
+    public void addPhase(T key, PhaseBase<T, Z> phase) {
         final Plugin plugin = HowaLib.getInstance().getPlugin();
 
         phase.setManager(this);
