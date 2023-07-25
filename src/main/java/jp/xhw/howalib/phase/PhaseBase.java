@@ -39,7 +39,7 @@ public abstract class PhaseBase<T, Z> implements Listener {
         }
     }
 
-    private Z getData() {
+    protected Z getData() {
         return manager.getData();
     }
 
